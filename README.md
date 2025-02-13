@@ -1,93 +1,75 @@
-Shortcut Learning in Machine Learning Models
+# Mitigating Shortcut Learning in Machine Learning Models
 
-Overview
+### Overview
+This repository explores **shortcut learning**, a phenomenon where machine learning models rely on spurious correlations instead of genuine class-relevant features. We conduct experiments on two distinct datasets:
 
-This repository investigates shortcut learning, a phenomenon where machine learning models rely on spurious correlations rather than learning genuine class-relevant features. The study employs two distinct datasets:
+- **International Skin Imaging Collaboration (ISIC) dataset** – A real-world medical image classification dataset. The presence of unintended visual artifacts (e.g., medical patches) introduces biases that influence model predictions.
 
-International Skin Imaging Collaboration (ISIC) dataset for real-world medical image classification.
+- **Colored MNIST (CMNIST) dataset** – A variant of MNIST with controlled biases, designed for systematic evaluation of shortcut learning. We classify digits **"0"** and **"2"**, which share structural similarities while remaining distinguishable.
 
-Colored MNIST (CMNIST) dataset with controlled biases for systematic evaluation.
+#### Dataset Variants:
+- **Colored Background** – Digit **"0"** has a red background.
+- **Colored Digits** – Digits are directly colored red.
+- **Dynamic Left Patch** – A red patch is placed on the left side of digit **"0"**.
 
-By analyzing these datasets, we explore how models develop unintended dependencies and propose mitigation strategies using Sparse Autoencoders and Correlation-Based Neuron Suppression.
+---
 
-Datasets
+### Model Architecture
+We adapt **AlexNet**, a deep convolutional network originally designed for ImageNet, for binary classification.
 
-1. ISIC Dataset
+#### Modifications:
+1. **Feature Extraction Layers** – Frozen to retain pre-trained ImageNet features.
+2. **Fully Connected Layers** – Modified for two-class classification.
+3. **Activation Extraction** – Activations are taken from the **FC2** layer for further analysis.
 
-The International Skin Imaging Collaboration (ISIC) dataset is widely used for skin lesion classification. However, unintended visual artifacts (e.g., medical patches) create biases, influencing model predictions.
+---
 
-Dataset Structure:
+### Mitigating Shortcut Learning
+We introduce two key strategies to mitigate shortcut learning:
 
-Class
+#### 1. Sparse Autoencoder (SAE)
+A **Sparse Autoencoder (SAE)** is employed to transform feature activations into a structured latent space, reducing shortcut dependencies.
 
-Description
+**How it works:**
+- **Encoder** – Compresses activations while enforcing sparsity.
+- **Decoder** – Reconstructs activations while suppressing shortcut-related neurons.
+- **Sparsity Constraints** – L1 regularization is applied to limit neuron activations.
 
-Benign-NoPatch
+#### 2. Correlation-Based Neuron Suppression
+This technique identifies and suppresses shortcut-sensitive neurons using **Pearson correlation analysis**.
 
-Benign skin lesion without artifacts
+**Steps:**
+- **Pearson Correlation Analysis** – Identifies neurons highly correlated with artifacts.
+- **Neuron Muting** – Suppresses neurons influenced by shortcuts.
+- **Final Reconstruction** – Retains core discriminative features while reducing shortcut learning.
 
-Benign-Patch
+---
 
-Benign skin lesion with artifacts
+### Usage
+#### Data Preparation
+Prepare the patches for the MNIST dataset:
+```bash
+Data_preparation/MNIST_28_patch_preparation.ipynb
+```
 
-Malignant-NoPatch
+#### Training AlexNet on ISIC or CMNIST Datasets
+```bash
+ERM/MNIST_28_alexnet_eval.ipynb
+ERM/ISIC_228_alexnet_eval.ipynb
+```
 
-Malignant skin lesion without artifacts
+#### Running Feature Extraction, Correlation Analysis, Sparse Projections, and Muting
+```bash
+Sparse_muting/MNIST_foreground_SAE_muting.ipynb
+Sparse_muting/MNIST_background_SAE_muting.ipynb
+Sparse_muting/MNIST_dyn_lp_SAE_muting.ipynb
+Sparse_muting/ISIC_SAE_muting.ipynb
+```
 
-Malignant-Patch
+---
 
-Malignant skin lesion with artificially introduced artifacts
+### Citation
+If you find this work useful, please consider citing our repository.
 
-
-
-2. Colored MNIST (CMNIST) Dataset
-
-A variant of MNIST, the CMNIST dataset introduces artificial biases to test shortcut learning. We classify digits "0" and "2", as they share similar structures but remain distinguishable.
-
-Dataset Variants:
-
-Colored Background: Digit "0" has a red background.
-
-Colored Digits: Digits are directly colored red.
-
-Dynamic Left Patch: A red patch is placed on the left side of digit "0".
-
-
-
-Model Architecture
-
-We use AlexNet, a deep convolutional network originally designed for ImageNet, and adapt it for binary classification.
-
-1. AlexNet Modifications
-
-Feature Extraction Layers: Frozen to retain pre-trained ImageNet features.
-
-Fully Connected Layers: Modified for two-class classification.
-
-Activation Extraction: Activations are taken from the FC2 layer for further analysis.
-
-📷 Modified AlexNet Structure:
-
-Mitigating Shortcut Learning
-
-1. Sparse Autoencoder (SAE)
-
-We employ a Sparse Autoencoder to transform feature activations into a structured latent space that removes shortcut dependencies.
-
-How it works:
-
-Encoder: Compresses activations, enforcing sparsity.
-
-Decoder: Reconstructs activations, suppressing shortcut-related neurons.
-
-Sparsity Constraints: L1 regularization applied to limit neuron activations.
-
-
-2. Correlation-Based Neuron Suppression
-
-Pearson Correlation Analysis: Identifies neurons highly correlated with artifacts.
-
-Neuron Muting: Suppresses shortcut-sensitive neurons.
-
-Final Reconstruction: Retains core discriminative features while reducing shortcut learning.
+---
 
